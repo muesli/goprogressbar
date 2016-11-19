@@ -34,8 +34,16 @@ func NewProgressBar(text string, total, current int64, width uint) *ProgressBar 
 func (p *ProgressBar) Print() {
 	pct := float64(p.Current) / float64(p.Total)
 	if p.Total == 0 {
-		pct = 0
+		if p.Current == 0 {
+			// When both Total and Current are 0, show a full progressbar
+			pct = 1
+		} else {
+			pct = 0
+		}
 	}
+
+	// percentage is bound between 0 and 1
+	pct = math.Min(1, math.Max(0, pct))
 
 	clearCurrentLine()
 
@@ -55,15 +63,15 @@ func (p *ProgressBar) Print() {
 
 	text := p.Text
 	maxTextWidth := int(tiWidth) - 3 - int(barWidth) - len(p.RightAlignedText)
+	if maxTextWidth < 0 {
+		maxTextWidth = 0
+	}
 	if len(p.Text) > maxTextWidth {
 		if len(p.Text)-maxTextWidth+3 < len(p.Text) {
 			text = "..." + p.Text[len(p.Text)-maxTextWidth+3:]
 		} else {
 			text = ""
 		}
-	}
-	if maxTextWidth < 0 {
-		maxTextWidth = 0
 	}
 
 	// Print text
