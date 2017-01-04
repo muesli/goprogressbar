@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 	"syscall"
+	"time"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -19,7 +20,7 @@ type ProgressBar struct {
 	Current          int64
 	Width            uint
 
-	lastPrintPct float64
+	lastPrintTime time.Time
 }
 
 // NewProgressBar returns a new progress bar
@@ -48,11 +49,12 @@ func (p *ProgressBar) percentage() float64 {
 
 // LazyPrint writes the progress bar to stdout if a significant update occurred
 func (p *ProgressBar) LazyPrint() {
-	if p.percentage() > (p.lastPrintPct+0.001) ||
-		p.lastPrintPct == 0 ||
+	now := time.Now()
+	if now.Sub(p.lastPrintTime) > time.Second/25 ||
+		p.Current == 0 ||
 		p.Current == p.Total {
-		// Only print when progress has significantly changed
-		p.lastPrintPct = p.percentage()
+		// Max out at 25fps
+		p.lastPrintTime = now
 		p.Print()
 	}
 }
