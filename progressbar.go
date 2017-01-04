@@ -18,6 +18,8 @@ type ProgressBar struct {
 	Total            int64
 	Current          int64
 	Width            uint
+
+	lastPrintPct float64
 }
 
 // NewProgressBar returns a new progress bar
@@ -30,8 +32,7 @@ func NewProgressBar(text string, total, current int64, width uint) *ProgressBar 
 	}
 }
 
-// Print writes the progress bar to stdout
-func (p *ProgressBar) Print() {
+func (p *ProgressBar) percentage() float64 {
 	pct := float64(p.Current) / float64(p.Total)
 	if p.Total == 0 {
 		if p.Current == 0 {
@@ -42,8 +43,24 @@ func (p *ProgressBar) Print() {
 		}
 	}
 
+	return pct
+}
+
+// LazyPrint writes the progress bar to stdout if a significant update occurred
+func (p *ProgressBar) LazyPrint() {
+	if p.percentage() > (p.lastPrintPct+0.001) ||
+		p.lastPrintPct == 0 ||
+		p.Current == p.Total {
+		// Only print when progress has significantly changed
+		p.lastPrintPct = p.percentage()
+		p.Print()
+	}
+}
+
+// Print writes the progress bar to stdout
+func (p *ProgressBar) Print() {
 	// percentage is bound between 0 and 1
-	pct = math.Min(1, math.Max(0, pct))
+	pct := math.Min(1, math.Max(0, p.percentage()))
 
 	clearCurrentLine()
 
