@@ -173,7 +173,7 @@ func (mp *MultiProgressBar) LazyPrint() {
 	}
 
 	if forced {
-		// Max out at 20fps
+		// Max out at 25fps
 		mp.lastPrintTime = now
 
 		moveCursorUp(uint(len(mp.ProgressBars)))

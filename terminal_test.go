@@ -9,7 +9,6 @@ package goprogressbar
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 )
 
@@ -40,33 +39,4 @@ func TestPercentageSpecialValues2(t *testing.T) {
 	if p.percentage() != 0 {
 		t.Errorf("percentage should be 0 when current is greater than 0 but the total is unknown (0), got: %f", p.percentage())
 	}
-}
-
-func TestProgressBarOutput(t *testing.T) {
-	buf := &bytes.Buffer{}
-	Stdout = buf
-
-	p := ProgressBar{Text: "Test", Current: 0, Total: 100, Width: 60}
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
-	p.Print()
-	if buf.String() != "\033[2K\rTest                           0 of 100 [#>---------------------------]   0.00%" {
-		t.Errorf("Unexpected progressbar print behaviour")
-	}
-	buf.Reset()
-
-	p.Current = 10
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
-	p.Print()
-	if buf.String() != "\033[2K\rTest                          10 of 100 [##>--------------------------]  10.00%" {
-		t.Errorf("Unexpected progressbar print behaviour")
-	}
-	buf.Reset()
-
-	p.Current = 100
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
-	p.Print()
-	if buf.String() != "\033[2K\rTest                         100 of 100 [#############################] 100.00%" {
-		t.Errorf("Unexpected progressbar print behaviour")
-	}
-	buf.Reset()
 }
