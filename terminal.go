@@ -10,13 +10,13 @@ package goprogressbar
 import "fmt"
 
 func clearCurrentLine() {
-	fmt.Print("\033[2K\r")
+	fmt.Fprintf(Stdout, "\033[2K\r")
 }
 
 func moveCursorUp(lines uint) {
-	fmt.Printf("\033[%dA", lines)
+	fmt.Fprintf(Stdout, "\033[%dA", lines)
 }
 
 func moveCursorDown(lines uint) {
-	fmt.Printf("\033[%dB", lines)
+	fmt.Fprintf(Stdout, "\033[%dB", lines)
 }

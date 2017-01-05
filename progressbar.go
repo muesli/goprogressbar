@@ -9,7 +9,9 @@ package goprogressbar
 
 import (
 	"fmt"
+	"io"
 	"math"
+	"os"
 	"strings"
 	"syscall"
 	"time"
@@ -17,7 +19,12 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-const progressBarFormat = "[#>-]"
+var (
+	// Stdout defines where output gets printed to
+	Stdout io.Writer = os.Stdout
+	// BarFormat defines the bar design
+	BarFormat = "[#>-]"
+)
 
 // ProgressBar is a helper for printing a progress bar
 type ProgressBar struct {
@@ -37,6 +44,7 @@ type MultiProgressBar struct {
 	lastPrintTime time.Time
 }
 
+// percentage returns the percentage bound between 0.0 and 1.0
 func (p *ProgressBar) percentage() float64 {
 	pct := float64(p.Current) / float64(p.Total)
 	if p.Total == 0 {
@@ -48,7 +56,8 @@ func (p *ProgressBar) percentage() float64 {
 		}
 	}
 
-	return pct
+	// percentage is bound between 0 and 1
+	return math.Min(1, math.Max(0, pct))
 }
 
 // UpdateRequired returns true when this progressbar wants an update regardless
@@ -69,9 +78,7 @@ func (p *ProgressBar) LazyPrint() {
 
 // Print writes the progress bar to stdout
 func (p *ProgressBar) Print() {
-	// percentage is bound between 0 and 1
-	pct := math.Min(1, math.Max(0, p.percentage()))
-
+	pct := p.percentage()
 	clearCurrentLine()
 
 	pcts := fmt.Sprintf("%.2f%%", pct*100)
@@ -80,7 +87,12 @@ func (p *ProgressBar) Print() {
 	}
 
 	tiWidth, _, _ := terminal.GetSize(int(syscall.Stdin))
-	barWidth := uint(math.Min(float64(p.Width), float64(tiWidth)/3.0))
+	if tiWidth < 0 {
+		// we're not running inside a real terminal (e.g. CI)
+		// we assume a width of 80
+		tiWidth = 80
+	}
+	barWidth := uint(math.Min(float64(p.Width), float64(tiWidth)/2.0))
 
 	size := int(barWidth) - len(pcts) - 4
 	fill := int(math.Max(2, math.Floor((float64(size)*pct)+.5)))
@@ -106,21 +118,21 @@ func (p *ProgressBar) Print() {
 		text,
 		strings.Repeat(" ", maxTextWidth-len(text)),
 		p.RightAlignedText)
-	fmt.Print(s)
+	fmt.Fprint(Stdout, s)
 
 	if barWidth > 0 {
-		progChar := progressBarFormat[2]
+		progChar := BarFormat[2]
 		if p.Current == p.Total {
-			progChar = progressBarFormat[1]
+			progChar = BarFormat[1]
 		}
 
 		// Print progress bar
-		fmt.Printf("%c%s%c%s%c %s",
-			progressBarFormat[0],
-			strings.Repeat(string(progressBarFormat[1]), fill-1),
+		fmt.Fprintf(Stdout, "%c%s%c%s%c %s",
+			BarFormat[0],
+			strings.Repeat(string(BarFormat[1]), fill-1),
 			progChar,
-			strings.Repeat(string(progressBarFormat[3]), size-fill),
-			progressBarFormat[4],
+			strings.Repeat(string(BarFormat[3]), size-fill),
+			BarFormat[4],
 			pcts)
 	}
 }
