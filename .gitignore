@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+*~
+examples/multibar/multibar
+examples/singlebar/singlebar
