@@ -1,3 +1,10 @@
+/*
+ * goprogressbar
+ *     Copyright (c) 2016-2017, Christian Muehlhaeuser <muesli@gmail.com>
+ *
+ *   For license see LICENSE
+ */
+
 package goprogressbar
 
 import (
@@ -23,14 +30,11 @@ type ProgressBar struct {
 	lastPrintTime time.Time
 }
 
-// NewProgressBar returns a new progress bar
-func NewProgressBar(text string, total, current int64, width uint) *ProgressBar {
-	return &ProgressBar{
-		Text:    text,
-		Total:   total,
-		Current: current,
-		Width:   width,
-	}
+// MultiProgressBar is a helper for printing multiple progress bars
+type MultiProgressBar struct {
+	ProgressBars []*ProgressBar
+
+	lastPrintTime time.Time
 }
 
 func (p *ProgressBar) percentage() float64 {
@@ -47,12 +51,16 @@ func (p *ProgressBar) percentage() float64 {
 	return pct
 }
 
+// UpdateRequired returns true when this progressbar wants an update regardless
+// of fps limitation
+func (p *ProgressBar) UpdateRequired() bool {
+	return p.Current == 0 || p.Current == p.Total
+}
+
 // LazyPrint writes the progress bar to stdout if a significant update occurred
 func (p *ProgressBar) LazyPrint() {
 	now := time.Now()
-	if now.Sub(p.lastPrintTime) > time.Second/25 ||
-		p.Current == 0 ||
-		p.Current == p.Total {
+	if p.UpdateRequired() || now.Sub(p.lastPrintTime) > time.Second/25 {
 		// Max out at 25fps
 		p.lastPrintTime = now
 		p.Print()
@@ -117,14 +125,49 @@ func (p *ProgressBar) Print() {
 	}
 }
 
-func clearCurrentLine() {
-	fmt.Print("\033[2K\r")
+// AddProgressBar adds another progress bar to the multi struct
+func (mp *MultiProgressBar) AddProgressBar(p *ProgressBar) {
+	mp.ProgressBars = append(mp.ProgressBars, p)
+
+	if len(mp.ProgressBars) > 1 {
+		fmt.Println()
+	}
+	mp.Print()
 }
 
-func MoveCursorUp(lines uint) {
-	fmt.Printf("\033[%dA", lines)
+// Print writes all progress bars to stdout
+func (mp *MultiProgressBar) Print() {
+	moveCursorUp(uint(len(mp.ProgressBars)))
+
+	for _, p := range mp.ProgressBars {
+		moveCursorDown(1)
+		p.Print()
+	}
 }
 
-func MoveCursorDown(lines uint) {
-	fmt.Printf("\033[%dB", lines)
+// LazyPrint writes all progress bars to stdout if a significant update occurred
+func (mp *MultiProgressBar) LazyPrint() {
+	forced := false
+	for _, p := range mp.ProgressBars {
+		if p.UpdateRequired() {
+			forced = true
+			break
+		}
+	}
+
+	now := time.Now()
+	if !forced {
+		forced = now.Sub(mp.lastPrintTime) > time.Second/25
+	}
+
+	if forced {
+		// Max out at 20fps
+		mp.lastPrintTime = now
+
+		moveCursorUp(uint(len(mp.ProgressBars)))
+		for _, p := range mp.ProgressBars {
+			moveCursorDown(1)
+			p.Print()
+		}
+	}
 }
