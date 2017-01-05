@@ -7,7 +7,7 @@ Golang helper to print one or many progress bars on the console
 
 Make sure you have a working Go environment. Follow the [Go install instructions](http://golang.org/doc/install.html).
 
-First of all you need to checkout the source code:
+To install goprogressbar, simply run:
 
     go get github.com/muesli/goprogressbar
 
