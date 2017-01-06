@@ -169,9 +169,7 @@ func TestFormat(t *testing.T) {
 	BarFormat = "(+-_)"
 
 	p := ProgressBar{Text: "Test", Current: 10, Total: 100, Width: 60}
-	p.PrependTextFunc = func(p *ProgressBar) string {
-		return fmt.Sprintf("%d of %d", p.Current, p.Total)
-	}
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 
 	p.Print()
 
