@@ -10,7 +10,6 @@ package goprogressbar
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"testing"
 )
 
@@ -71,7 +70,6 @@ func TestMultiProgressBarOutput(t *testing.T) {
 	buf := &bytes.Buffer{}
 	Stdout = buf
 
-	f, _ := os.Create("/tmp/foo.output")
 	p1 := ProgressBar{Text: "Test1", Current: 23, Total: 100, Width: 60}
 	p1.RightAlignedText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
 	p2 := ProgressBar{Text: "Test2", Current: 69, Total: 100, Width: 60}
@@ -86,7 +84,49 @@ func TestMultiProgressBarOutput(t *testing.T) {
 		"\033[1B\033[2K\rTest2                         69 of 100 [###################>---------]  69.00%" {
 		t.Errorf("Unexpected multi progressbar print behaviour")
 	}
-	f.Write(buf.Bytes())
-	f.Close()
+	buf.Reset()
+}
+
+func TestLazyPrint(t *testing.T) {
+	buf := &bytes.Buffer{}
+	Stdout = buf
+
+	p := ProgressBar{Text: "Test", Current: 10, Total: 100, Width: 60}
+	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+
+	// LazyPrint should buffer prints, so we call it twice and check it
+	// only prints once
+	p.LazyPrint()
+	p.LazyPrint()
+
+	if buf.String() != "\033[2K\rTest                          10 of 100 [##>--------------------------]  10.00%" {
+		t.Errorf("Unexpected progressbar print behaviour")
+	}
+	buf.Reset()
+}
+
+func TestMultiLazyPrint(t *testing.T) {
+	buf := &bytes.Buffer{}
+	Stdout = buf
+
+	p1 := ProgressBar{Text: "Test1", Current: 23, Total: 100, Width: 60}
+	p1.RightAlignedText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
+	p2 := ProgressBar{Text: "Test2", Current: 69, Total: 100, Width: 60}
+	p2.RightAlignedText = fmt.Sprintf("%d of %d", p2.Current, p2.Total)
+
+	mp := MultiProgressBar{}
+	mp.AddProgressBar(&p1)
+	mp.AddProgressBar(&p2)
+	buf.Reset()
+
+	// LazyPrint should buffer prints, so we call it twice and check it
+	// only prints once
+	mp.LazyPrint()
+	mp.LazyPrint()
+
+	if buf.String() != "\033[2A\033[1B\033[2K\rTest1                         23 of 100 [######>----------------------]  23.00%"+
+		"\033[1B\033[2K\rTest2                         69 of 100 [###################>---------]  69.00%" {
+		t.Errorf("Unexpected multi progressbar print behaviour")
+	}
 	buf.Reset()
 }
