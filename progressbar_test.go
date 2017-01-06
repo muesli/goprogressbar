@@ -130,3 +130,18 @@ func TestMultiLazyPrint(t *testing.T) {
 	}
 	buf.Reset()
 }
+
+func TestTextElide(t *testing.T) {
+	buf := &bytes.Buffer{}
+	Stdout = buf
+
+	p := ProgressBar{Text: "ThisIsAReallyLongLongStringHere", Current: 10, Total: 100, Width: 60}
+	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+
+	p.Print()
+
+	if buf.String() != "\033[2K\r...AReallyLongLongStringHere  10 of 100 [##>--------------------------]  10.00%" {
+		t.Errorf("Unexpected progressbar print behaviour")
+	}
+	buf.Reset()
+}
