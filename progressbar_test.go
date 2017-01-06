@@ -162,3 +162,21 @@ func TestTextElide(t *testing.T) {
 	}
 	buf.Reset()
 }
+
+func TestFormat(t *testing.T) {
+	buf := &bytes.Buffer{}
+	Stdout = buf
+	BarFormat = "(+-_)"
+
+	p := ProgressBar{Text: "Test", Current: 10, Total: 100, Width: 60}
+	p.PrependTextFunc = func(p *ProgressBar) string {
+		return fmt.Sprintf("%d of %d", p.Current, p.Total)
+	}
+
+	p.Print()
+
+	if buf.String() != "\033[2K\rTest                          10 of 100 (++-__________________________)  10.00%" {
+		t.Errorf("Unexpected progressbar print behaviour")
+	}
+	buf.Reset()
+}
