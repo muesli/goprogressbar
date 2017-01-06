@@ -23,7 +23,7 @@ func main() {
 	}
 
 	for i := 1; i <= 1000; i++ {
-		pb.RightAlignedText = fmt.Sprintf("%d of %d", i, pb.Total)
+		pb.PrependText = fmt.Sprintf("%d of %d", i, pb.Total)
 		pb.Current = int64(i)
 
 		time.Sleep(23 * time.Millisecond)

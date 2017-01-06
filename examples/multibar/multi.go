@@ -24,6 +24,9 @@ func main() {
 			Total:   100,
 			Current: 0,
 			Width:   60,
+			PrependTextFunc: func(p *goprogressbar.ProgressBar) string {
+				return fmt.Sprintf("%d of %d", p.Current, p.Total)
+			},
 		}
 
 		mpb.AddProgressBar(pb)
@@ -42,8 +45,6 @@ func main() {
 		for i := 1; i <= 100; i++ {
 			p := mpb.ProgressBars[j]
 			p.Current = int64(i)
-			p.RightAlignedText = fmt.Sprintf("%d of %d", i, p.Total)
-
 			pb.Current++
 
 			mpb.LazyPrint()

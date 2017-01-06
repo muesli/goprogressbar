@@ -42,7 +42,7 @@ func TestProgressBarOutput(t *testing.T) {
 	Stdout = buf
 
 	p := ProgressBar{Text: "Test", Current: 0, Total: 100, Width: 60}
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 	p.Print()
 	if buf.String() != "\033[2K\rTest                           0 of 100 [#>---------------------------]   0.00%" {
 		t.Errorf("Unexpected progressbar print behaviour")
@@ -50,7 +50,7 @@ func TestProgressBarOutput(t *testing.T) {
 	buf.Reset()
 
 	p.Current = 10
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 	p.Print()
 	if buf.String() != "\033[2K\rTest                          10 of 100 [##>--------------------------]  10.00%" {
 		t.Errorf("Unexpected progressbar print behaviour")
@@ -58,7 +58,7 @@ func TestProgressBarOutput(t *testing.T) {
 	buf.Reset()
 
 	p.Current = 100
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 	p.Print()
 	if buf.String() != "\033[2K\rTest                         100 of 100 [#############################] 100.00%" {
 		t.Errorf("Unexpected progressbar print behaviour")
@@ -71,9 +71,9 @@ func TestMultiProgressBarOutput(t *testing.T) {
 	Stdout = buf
 
 	p1 := ProgressBar{Text: "Test1", Current: 23, Total: 100, Width: 60}
-	p1.RightAlignedText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
+	p1.PrependText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
 	p2 := ProgressBar{Text: "Test2", Current: 69, Total: 100, Width: 60}
-	p2.RightAlignedText = fmt.Sprintf("%d of %d", p2.Current, p2.Total)
+	p2.PrependText = fmt.Sprintf("%d of %d", p2.Current, p2.Total)
 
 	mp := MultiProgressBar{}
 	mp.AddProgressBar(&p1)
@@ -92,7 +92,7 @@ func TestLazyPrint(t *testing.T) {
 	Stdout = buf
 
 	p := ProgressBar{Text: "Test", Current: 10, Total: 100, Width: 60}
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 
 	// LazyPrint should buffer prints, so we call it twice and check it
 	// only prints once
@@ -110,9 +110,9 @@ func TestMultiLazyPrint(t *testing.T) {
 	Stdout = buf
 
 	p1 := ProgressBar{Text: "Test1", Current: 23, Total: 100, Width: 60}
-	p1.RightAlignedText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
+	p1.PrependText = fmt.Sprintf("%d of %d", p1.Current, p1.Total)
 	p2 := ProgressBar{Text: "Test2", Current: 69, Total: 100, Width: 60}
-	p2.RightAlignedText = fmt.Sprintf("%d of %d", p2.Current, p2.Total)
+	p2.PrependText = fmt.Sprintf("%d of %d", p2.Current, p2.Total)
 
 	mp := MultiProgressBar{}
 	mp.AddProgressBar(&p1)
@@ -131,12 +131,29 @@ func TestMultiLazyPrint(t *testing.T) {
 	buf.Reset()
 }
 
+func TestPrependFunc(t *testing.T) {
+	buf := &bytes.Buffer{}
+	Stdout = buf
+
+	p := ProgressBar{Text: "Test", Current: 10, Total: 100, Width: 60}
+	p.PrependTextFunc = func(p *ProgressBar) string {
+		return fmt.Sprintf("%d of %d", p.Current, p.Total)
+	}
+
+	p.Print()
+
+	if buf.String() != "\033[2K\rTest                          10 of 100 [##>--------------------------]  10.00%" {
+		t.Errorf("Unexpected progressbar print behaviour")
+	}
+	buf.Reset()
+}
+
 func TestTextElide(t *testing.T) {
 	buf := &bytes.Buffer{}
 	Stdout = buf
 
 	p := ProgressBar{Text: "ThisIsAReallyLongLongStringHere", Current: 10, Total: 100, Width: 60}
-	p.RightAlignedText = fmt.Sprintf("%d of %d", p.Current, p.Total)
+	p.PrependText = fmt.Sprintf("%d of %d", p.Current, p.Total)
 
 	p.Print()
 

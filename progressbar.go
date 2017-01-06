@@ -28,11 +28,20 @@ var (
 
 // ProgressBar is a helper for printing a progress bar
 type ProgressBar struct {
-	Text             string
-	RightAlignedText string
-	Total            int64
-	Current          int64
-	Width            uint
+	// Text displayed on the very left
+	Text string
+	// Text prepending the bar
+	PrependText string
+	// Max value (100%)
+	Total int64
+	// Current progress value
+	Current int64
+	// Desired bar width
+	Width uint
+
+	// If a PrependTextFunc is set, the PrependText will be automatically
+	// generated on every print
+	PrependTextFunc func(p *ProgressBar) string
 
 	lastPrintTime time.Time
 }
@@ -78,6 +87,9 @@ func (p *ProgressBar) LazyPrint() {
 
 // Print writes the progress bar to stdout
 func (p *ProgressBar) Print() {
+	if p.PrependTextFunc != nil {
+		p.PrependText = p.PrependTextFunc(p)
+	}
 	pct := p.percentage()
 	clearCurrentLine()
 
@@ -101,7 +113,7 @@ func (p *ProgressBar) Print() {
 	}
 
 	text := p.Text
-	maxTextWidth := int(tiWidth) - 3 - int(barWidth) - len(p.RightAlignedText)
+	maxTextWidth := int(tiWidth) - 3 - int(barWidth) - len(p.PrependText)
 	if maxTextWidth < 0 {
 		maxTextWidth = 0
 	}
@@ -117,7 +129,7 @@ func (p *ProgressBar) Print() {
 	s := fmt.Sprintf("%s%s  %s ",
 		text,
 		strings.Repeat(" ", maxTextWidth-len(text)),
-		p.RightAlignedText)
+		p.PrependText)
 	fmt.Fprint(Stdout, s)
 
 	if barWidth > 0 {
