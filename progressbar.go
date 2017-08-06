@@ -85,6 +85,10 @@ func (p *ProgressBar) LazyPrint() {
 	}
 }
 
+func (p *ProgressBar) Clear() {
+	clearCurrentLine()
+}
+
 // Print writes the progress bar to stdout
 func (p *ProgressBar) Print() {
 	if p.PrependTextFunc != nil {
