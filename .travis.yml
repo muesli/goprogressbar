@@ -13,12 +13,12 @@ go:
   - tip
 
 before_install:
-- go get github.com/axw/gocov/gocov
-- go get github.com/mattn/goveralls
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
 
 script:
-- go test -v -tags ci ./...
-- $GOPATH/bin/goveralls -service=travis-ci -ignore="examples/singlebar/single.go,examples/multibar/multi.go"
+  - go test -v -tags ci ./...
+  - $GOPATH/bin/goveralls -service=travis-ci -ignore="examples/singlebar/single.go,examples/multibar/multi.go"
 
 notifications:
   email:
