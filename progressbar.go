@@ -20,6 +20,8 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+const fps = 25
+
 var (
 	// Stdout defines where output gets printed to
 	Stdout io.Writer = os.Stdout
@@ -79,8 +81,7 @@ func (p *ProgressBar) UpdateRequired() bool {
 // LazyPrint writes the progress bar to stdout if a significant update occurred
 func (p *ProgressBar) LazyPrint() {
 	now := time.Now()
-	if p.UpdateRequired() || now.Sub(p.lastPrintTime) > time.Second/25 {
-		// Max out at 25fps
+	if p.UpdateRequired() || now.Sub(p.lastPrintTime) > time.Second/fps {
 		p.lastPrintTime = now
 		p.Print()
 	}
@@ -188,11 +189,10 @@ func (mp *MultiProgressBar) LazyPrint() {
 
 	now := time.Now()
 	if !forced {
-		forced = now.Sub(mp.lastPrintTime) > time.Second/25
+		forced = now.Sub(mp.lastPrintTime) > time.Second/fps
 	}
 
 	if forced {
-		// Max out at 25fps
 		mp.lastPrintTime = now
 
 		moveCursorUp(uint(len(mp.ProgressBars)))
