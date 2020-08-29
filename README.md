@@ -1,22 +1,22 @@
 goprogressbar
 =============
 
+[![Latest Release](https://img.shields.io/github/release/muesli/goprogressbar.svg)](https://github.com/muesli/goprogressbar/releases)
+[![Build Status](https://github.com/muesli/goprogressbar/workflows/build/badge.svg)](https://github.com/muesli/goprogressbar/actions)
+[![Coverage Status](https://coveralls.io/repos/github/muesli/goprogressbar/badge.svg?branch=master)](https://coveralls.io/github/muesli/goprogressbar?branch=master)
+[![Go ReportCard](http://goreportcard.com/badge/muesli/goprogressbar)](http://goreportcard.com/report/muesli/goprogressbar)
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://pkg.go.dev/github.com/muesli/goprogressbar)
+
 Golang helper to print one or many progress bars on the console
 
 ## Installation
 
-Make sure you have a working Go environment (Go 1.7 or higher is required).
+Make sure you have a working Go environment (Go 1.9 or higher is required).
 See the [install instructions](http://golang.org/doc/install.html).
 
 To install goprogressbar, simply run:
 
     go get github.com/muesli/goprogressbar
-
-If you want to build it manually:
-
-    cd $GOPATH/src/github.com/muesli/goprogressbar
-    go get -u -v
-    go build
 
 ## Example
 
@@ -85,10 +85,3 @@ Progress 9                             [#>--------------------------------------
 Progress 10                            [#>-----------------------------------------------]   0.00%
 Overall Progress                       [#############>-----------------------------------]  28.90%
 ```
-
-## Development
-
-[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/muesli/goprogressbar)
-[![Build Status](https://travis-ci.org/muesli/goprogressbar.svg?branch=master)](https://travis-ci.org/muesli/goprogressbar)
-[![Coverage Status](https://coveralls.io/repos/github/muesli/goprogressbar/badge.svg?branch=master)](https://coveralls.io/github/muesli/goprogressbar?branch=master)
-[![Go ReportCard](http://goreportcard.com/badge/muesli/goprogressbar)](http://goreportcard.com/report/muesli/goprogressbar)
