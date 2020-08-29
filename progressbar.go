@@ -105,8 +105,8 @@ func (p *ProgressBar) Print() {
 		pcts = " " + pcts
 	}
 
-	tiWidth, _, _ := terminal.GetSize(int(syscall.Stdin))
-	if tiWidth < 0 {
+	tiWidth, _, err := terminal.GetSize(int(syscall.Stdin))
+	if tiWidth <= 0 || err != nil {
 		// we're not running inside a real terminal (e.g. CI)
 		// we assume a width of 80
 		tiWidth = 80
